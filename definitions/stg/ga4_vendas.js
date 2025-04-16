@@ -1,10 +1,10 @@
-publish(`ga4_vendas`, {
+publish(`ga4`, {
     type: "incremental",
     schema: "monitoramento"
 }).query(ctx => {
     const tenantQueries = constants.GA4_VENDAS
         .map(datasetGA4 => {
-            let day_r = 1;
+            let day_r = 2;
 
 
             const ga4_query = `
