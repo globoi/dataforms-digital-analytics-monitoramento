@@ -5,7 +5,7 @@ publish(`vendas_de_para`, {
 }).query(ctx => {
     const tenantQueries = constants.SF_VENDAS
         .map(datasetSF => {
-            let day_r = 15;
+            let day_r = 1;
 
 
             const salesforce_query = `

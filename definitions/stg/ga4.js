@@ -5,7 +5,7 @@ publish(`ga4`, {
 }).query(ctx => {
     const tenantQueries = constants.GA4_VENDAS
         .map(datasetGA4 => {
-            let day_r = 2;
+            let day_r = 1;
 
 
             const ga4_query = `
