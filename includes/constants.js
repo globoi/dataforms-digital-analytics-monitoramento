@@ -11,10 +11,14 @@ const GA4_VENDAS = [
     "analytics_153317366"
 ]
 
+const SF_VENDAS = [
+    "reports"
+]
 
 const DATASUFIXO = datasufixo()
 
 module.exports = {
     GA4_VENDAS,
-    DATASUFIXO
+    DATASUFIXO,
+    SF_VENDAS
 };

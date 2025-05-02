@@ -1,0 +1,51 @@
+config {
+  type: "assertion",
+  schema: "monitoramento",
+  tags: ["analytics","assertion"]
+}
+
+WITH base_ga4 AS (
+  SELECT
+    data,
+    produto,
+    metrica,
+    valor_metrica AS valor_ga4
+    FROM ${ref("analytics_dashboard")} g
+  WHERE origem = 'ga4'
+    AND DATE(data) = DATE_SUB(CURRENT_DATE(), INTERVAL 1 DAY)
+),
+
+base_sf AS (
+  SELECT
+    data,
+    produto,
+    metrica,
+    valor_metrica AS valor_sf
+ FROM ${ref("analytics_dashboard")} sf
+  WHERE origem = 'salesforce'
+    AND DATE(data) = DATE_SUB(CURRENT_DATE(), INTERVAL 1 DAY)
+),
+
+comparacao AS (
+  SELECT
+    COALESCE(g.data, s.data) AS data,
+    COALESCE(g.produto, s.produto) AS produto,
+    COALESCE(g.metrica, s.metrica) AS metrica,
+    g.valor_ga4,
+    s.valor_sf,
+    ABS(IFNULL(g.valor_ga4, 0) - IFNULL(s.valor_sf, 0)) AS diferenca_absoluta,
+    CASE
+      WHEN s.valor_sf IS NOT NULL AND s.valor_sf != 0 THEN ABS(g.valor_ga4 - s.valor_sf) / s.valor_sf
+      ELSE NULL
+    END * 100 AS diferenca_percentual
+    FROM base_ga4 g
+  FULL OUTER JOIN base_sf s
+    ON g.data = s.data
+    AND g.produto = s.produto
+    AND g.metrica = s.metrica
+)
+
+SELECT *
+FROM comparacao
+WHERE diferenca_percentual > 20
+ORDER BY diferenca_percentual DESC

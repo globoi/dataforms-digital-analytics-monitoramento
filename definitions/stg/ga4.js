@@ -1,6 +1,7 @@
 publish(`ga4`, {
     type: "incremental",
-    schema: "monitoramento"
+    schema: "monitoramento",
+     tags: ["ga4", "vendas", "web","stg"] 
 }).query(ctx => {
     const tenantQueries = constants.GA4_VENDAS
         .map(datasetGA4 => {
@@ -21,7 +22,27 @@ WHERE
   AND platform = "WEB"
   AND _TABLE_SUFFIX = FORMAT_DATETIME('%Y%m%d', DATE(DATE_SUB(current_date('America/Sao_Paulo'), INTERVAL ${day_r} DAY)))
 GROUP BY ALL
-ORDER BY 4 desc
+
+
+UNION ALL
+
+SELECT
+  PARSE_DATE('%Y%m%d', event_date) AS data,
+  platform plataforma,
+  "vendas_origem" metrica,
+  dp.origem  AS produto,
+  count(*) valor_metrica,
+  current_datetime data_ingestao
+  FROM ${ctx.ref(datasetGA4, "events_*")}
+  LEFT JOIN ${ctx.ref("monitoramento", "vendas_de_para")}  dp on cast(dp.origem_id as int64) = (SELECT value.int_value FROM UNNEST(event_params) WHERE key = "origem_id")
+WHERE
+  event_name = "purchase"
+  AND platform = "WEB"
+  AND _TABLE_SUFFIX = FORMAT_DATETIME('%Y%m%d', DATE(DATE_SUB(current_date('America/Sao_Paulo'), INTERVAL ${day_r} DAY)))
+GROUP BY ALL
+
+
+
 `;
 
             return ga4_query;
