@@ -20,7 +20,20 @@ FROM ${ctx.ref(datasetSF, "vendas_sf")}
 WHERE dt_venda = DATE(DATE_SUB(current_date('America/Sao_Paulo'), INTERVAL ${day_r} DAY))
   AND canal_compra = 'WEB'
 GROUP BY ALL
-ORDER BY 4 desc
+
+UNION ALL 
+
+SELECT dt_venda data, 
+       canal_compra plataforma,
+       "vendas_origem" metrica,  
+       origem produto, 
+       count(*) valor_metrica,
+      current_datetime data_ingestao
+FROM ${ctx.ref(datasetSF, "vendas_sf")}
+WHERE dt_venda = DATE(DATE_SUB(current_date('America/Sao_Paulo'), INTERVAL ${day_r} DAY))
+  AND canal_compra = 'WEB'
+GROUP BY ALL
+
 
 `;
 
