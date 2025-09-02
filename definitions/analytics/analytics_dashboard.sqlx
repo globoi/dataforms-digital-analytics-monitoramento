@@ -7,10 +7,10 @@ config {
 
 WITH analytics AS (
   SELECT *, "ga4" origem 
-  FROM ${ref("ga4")} a
+  FROM ${ref("ga4_vendas")} a
   WHERE data_ingestao = (
     SELECT MAX(data_ingestao)
-    FROM ${ref("ga4")} tmp
+    FROM ${ref("ga4_vendas")} tmp
     WHERE a.data = tmp.data
       AND a.plataforma = tmp.plataforma
       AND a.metrica = tmp.metrica

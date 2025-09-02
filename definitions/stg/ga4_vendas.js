@@ -1,4 +1,4 @@
-publish(`ga4`, {
+publish(`ga4_vendas`, {
     type: "incremental",
     schema: "monitoramento",
      tags: ["ga4", "vendas", "web","stg"] 
