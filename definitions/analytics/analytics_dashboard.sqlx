@@ -27,6 +27,17 @@ WITH analytics AS (
       AND a.metrica = tmp.metrica
       AND a.produto = tmp.produto
   )
+  UNION ALL
+  SELECT *, "ga4" origem 
+  FROM ${ref("ga4_completude_globo_id")} a
+  WHERE data_ingestao = (
+    SELECT MAX(data_ingestao)
+    FROM ${ref("ga4_completude_globo_id")} tmp
+    WHERE a.data = tmp.data
+      AND a.plataforma = tmp.plataforma
+      AND a.metrica = tmp.metrica
+      AND a.produto = tmp.produto
+  )
 )
 
 SELECT *
