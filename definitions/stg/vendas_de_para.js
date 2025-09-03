@@ -1,7 +1,7 @@
 publish(`vendas_de_para`, {
     type: "table",
     schema: "monitoramento",
-    tags: ["salesforce", "vendas", "web","de_para","stg"] 
+    tags: ["salesforce", "vendas", "web", "de_para", "stg"]
 }).query(ctx => {
     const tenantQueries = constants.SF_VENDAS
         .map(datasetSF => {
@@ -11,13 +11,14 @@ publish(`vendas_de_para`, {
 
 
             const salesforce_query = `
-SELECT  DISTINCT origem_id, origem
-FROM ${ctx.ref(datasetSF, "vendas_sf")} sf
-WHERE ts_venda = (select max(ts_venda)
-                  FROM ${ctx.ref(datasetSF, "vendas_sf")} sf_aux
-                  WHERE sf_aux.origem_id = sf.origem_id 
-                  ) 
-`;
+                                        SELECT DISTINCT 
+                                            origem_id, 
+                                            origem
+                                        FROM ${ctx.ref(datasetSF, "vendas_sf")} sf
+                                        WHERE ts_venda = (select max(ts_venda)
+                                        FROM ${ctx.ref(datasetSF, "vendas_sf")} sf_aux
+                                        WHERE sf_aux.origem_id = sf.origem_id ) 
+                `;
 
             return salesforce_query;
         });
@@ -28,6 +29,3 @@ WHERE ts_venda = (select max(ts_venda)
 
     return finalQuery;
 });
-
-
-
