@@ -22,6 +22,18 @@ const GA4_TENANT = [
     "cartola"
 ]
 
+const HORIZON_TENANT = [
+    "globoplay",
+    "g1",
+    "ge",
+    "gshow",
+    "home_globo",
+    "receitas",
+    "gigagloob",
+    "vitrine",
+    "cartola"
+]
+
 
 const SF_VENDAS = [
     "reports"
@@ -33,5 +45,6 @@ module.exports = {
     GA4_VENDAS,
     DATASUFIXO,
     SF_VENDAS,
-    GA4_TENANT
+    GA4_TENANT,
+    HORIZON_TENANT
 };

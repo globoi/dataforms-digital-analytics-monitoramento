@@ -1,7 +1,7 @@
 publish(`ga4_vendas`, {
   type: "incremental",
   schema: "monitoramento",
-  tags: ["ga4", "vendas", "web", "stg"] 
+  tags: ["ga4",  "vendas", "web", "stg"] 
 }).query(ctx => {
   const temp_tenant = "analytics_153317366"; // globoplay
   const day_r = 1;

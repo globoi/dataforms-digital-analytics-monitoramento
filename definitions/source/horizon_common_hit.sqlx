@@ -1,0 +1,6 @@
+config {
+  type: "declaration",
+  database: 'gglobo-dataplatform-hdg-prd',
+  schema: 'raw_event_streaming',
+  name: 'common_hit_1_1*'
+}

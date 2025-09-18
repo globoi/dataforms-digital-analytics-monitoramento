@@ -1,7 +1,7 @@
 publish(`ga4_completude_globo_id`, {
     type: "incremental",
     schema: "monitoramento",
-    tags: ["ga4", "completude", "web", "stg", "globo_id"]
+    tags: ["ga4", "completude", "pageviews", "stg", "globo_id"]
 }).query(ctx => {
     const tenantQueries = constants.GA4_TENANT
         .filter(horizonTenant => horizonTenant !== "gigagloob")
