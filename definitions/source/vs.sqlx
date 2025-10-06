@@ -1,0 +1,6 @@
+config {
+  type: "declaration",
+  database: 'gglobo-video-watch-hdg-prd',
+  schema: 'video_watcher_oz',
+  name: 'vs'
+}

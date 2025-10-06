@@ -49,6 +49,28 @@ UNION ALL
       AND a.metrica = tmp.metrica
       AND a.produto = tmp.produto
   )
+UNION ALL
+  SELECT *, "ga4" origem 
+  FROM ${ref("ga4_videos")} a
+  WHERE data_ingestao = (
+    SELECT MAX(data_ingestao)
+    FROM ${ref("ga4_videos")} tmp
+    WHERE a.data = tmp.data
+      AND a.plataforma = tmp.plataforma
+      AND a.metrica = tmp.metrica
+      AND a.produto = tmp.produto
+  )
+  UNION ALL
+  SELECT *, "horizon" origem 
+  FROM ${ref("horizon_videos")} a
+  WHERE data_ingestao = (
+    SELECT MAX(data_ingestao)
+    FROM ${ref("horizon_videos")} tmp
+    WHERE a.data = tmp.data
+      AND a.plataforma = tmp.plataforma
+      AND a.metrica = tmp.metrica
+      AND a.produto = tmp.produto
+  )
 )
 
 SELECT *

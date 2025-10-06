@@ -1,0 +1,6 @@
+config {
+  type: "declaration",
+  database: 'gglobo-globoplay-dados-hdg-prd',
+  schema: 'udfs',
+  name: 'plataforma_ga_detalhe_tecnologias'
+}
