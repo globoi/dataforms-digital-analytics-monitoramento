@@ -1,7 +1,7 @@
 publish(`horizon_videos`, {
   type: "incremental",
   schema: "monitoramento",
-  tags: ["horizon", "videos", "video_views", "video_playtime"]
+  tags: ["horizon", "videos", "video_views", "video_playtime","stg"]
 }).query(ctx => {
   const day_r = 1;
 

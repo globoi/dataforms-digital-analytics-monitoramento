@@ -1,7 +1,7 @@
 publish(`ga4_videos`, {
     type: "incremental",
     schema: "monitoramento",
-    tags: ["ga4", "videos", "video_views", "video_playtime"]
+    tags: ["ga4", "videos", "video_views", "video_playtime","stg"]
 }).query(ctx => {
     const tenantQueries = constants.GA4_TENANT
         .filter(horizonTenant => horizonTenant !== "gigagloob")
