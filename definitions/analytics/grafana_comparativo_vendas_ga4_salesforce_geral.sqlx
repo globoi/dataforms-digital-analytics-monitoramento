@@ -1,0 +1,30 @@
+config {
+  type: "table",
+  schema: "monitoramento",
+  tags: ["analytics","grafana","dashboard"]
+}
+
+WITH base_dados AS (
+  SELECT 
+    TIMESTAMP(DATETIME(data, TIME(15, 0, 0)), "America/Sao_Paulo") AS data,
+    origem,
+    SUM(valor_metrica) valor_metrica
+  FROM `gglobo-bd-tracking-hdg-prd.monitoramento.analytics_dashboard`
+  WHERE metrica = "vendas"
+  GROUP BY 1,2
+  ORDER BY 1,2
+),
+
+pivot_dados AS (
+  SELECT 
+    data,
+    SUM(CASE WHEN origem = 'salesforce' THEN valor_metrica END) AS valor_salesforce,
+    SUM(CASE WHEN origem = 'ga4' THEN valor_metrica END) AS valor_ga4
+  FROM base_dados
+  GROUP BY 1
+)
+
+SELECT 
+  data,
+  ROUND(SAFE_DIVIDE(valor_salesforce - valor_ga4, valor_ga4), 2) * 100 AS percentual_diferenca
+FROM pivot_dados
