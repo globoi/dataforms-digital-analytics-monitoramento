@@ -1,0 +1,49 @@
+config {
+  type: "table",
+  schema: "monitoramento",
+  tags: ["analytics","grafana","dashboard"]
+}
+
+WITH base_dados AS (
+  SELECT 
+    TIMESTAMP(data) AS data,
+    plataforma,
+    "total_pageviews" metrica,
+    produto,
+    origem,
+    SUM(valor_metrica) valor_metrica
+  FROM   ${ref("analytics_dashboard")}
+  WHERE metrica in ("page_views_com_globo_id","page_views_sem_globo_id")
+  GROUP BY 1,2,3,4,5
+  UNION ALL
+  SELECT 
+    TIMESTAMP(data) AS data,
+    plataforma,
+    "total_pageviews" metrica,
+    produto,
+    origem,
+    SUM(valor_metrica) valor_metrica
+  FROM   ${ref("analytics_dashboard")}
+  WHERE metrica in ("total_pageviews")
+  GROUP BY 1,2,3,4,5
+),
+
+pivot_dados AS (
+  SELECT 
+    data,
+    plataforma,
+    metrica,
+    produto,
+    SUM(CASE WHEN origem = 'horizon' THEN valor_metrica END) AS valor_horizon,
+    SUM(CASE WHEN origem = 'ga4' THEN valor_metrica END) AS valor_ga4
+  FROM base_dados
+  GROUP BY 1,2,3,4
+)
+
+SELECT 
+  data,
+  plataforma,
+  metrica,
+  produto,
+  ROUND(SAFE_DIVIDE(valor_horizon - valor_ga4, valor_ga4),2) * 100 AS percentual_diferenca
+FROM pivot_dados
