@@ -1,0 +1,82 @@
+config {
+  type: "table",
+  schema: "monitoramento",
+  tags: ["analytics","grafana","dashboard"]
+}
+
+-- 1. CTE para obter a base de dados
+WITH BaseData AS (
+    SELECT
+        data,
+        plataforma,
+        metrica,
+        produto,
+        origem,
+        valor_metrica
+    FROM   ${ref("analytics_dashboard")}
+    where metrica = "video_playtime" and origem = "ga4"
+),
+
+-- 2. CTE para realizar o LEFT JOIN com as 4 semanas anteriores
+WeeklyComparison AS (
+    SELECT
+        t1.*,
+        t_w1.valor_metrica AS valor_w1, -- W-1 (7 dias)
+        t_w2.valor_metrica AS valor_w2, -- W-2 (14 dias)
+        t_w3.valor_metrica AS valor_w3, -- W-3 (21 dias)
+        t_w4.valor_metrica AS valor_w4  -- W-4 (28 dias)
+    FROM
+        BaseData t1
+    
+    -- LEFT JOINs mantidos com as condições de data e agrupamento
+    LEFT JOIN BaseData t_w1 ON t1.plataforma = t_w1.plataforma AND t1.metrica = t_w1.metrica AND t1.produto = t_w1.produto AND t1.origem = t_w1.origem AND t_w1.data = DATE_SUB(t1.data, INTERVAL 7 DAY)
+    LEFT JOIN BaseData t_w2 ON t1.plataforma = t_w2.plataforma AND t1.metrica = t_w2.metrica AND t1.produto = t_w2.produto AND t1.origem = t_w2.origem AND t_w2.data = DATE_SUB(t1.data, INTERVAL 14 DAY)
+    LEFT JOIN BaseData t_w3 ON t1.plataforma = t_w3.plataforma AND t1.metrica = t_w3.metrica AND t1.produto = t_w3.produto AND t1.origem = t_w3.origem AND t_w3.data = DATE_SUB(t1.data, INTERVAL 21 DAY)
+    LEFT JOIN BaseData t_w4 ON t1.plataforma = t_w4.plataforma AND t1.metrica = t_w4.metrica AND t1.produto = t_w4.produto AND t1.origem = t_w4.origem AND t_w4.data = DATE_SUB(t1.data, INTERVAL 28 DAY)
+)
+
+-- 3. Cálculo Final da Média Ajustada e Diferença Percentual
+SELECT
+    data,
+    plataforma,
+    metrica,
+    produto,
+    origem,
+    valor_metrica, -- Valor do dia atual (Vi)
+    valor_w1,
+    valor_w2,
+    valor_w3,
+    valor_w4,
+    
+    -- Soma dos valores das semanas anteriores (NULLs são ignorados)
+    (
+        COALESCE(valor_w1, 0) + 
+        COALESCE(valor_w2, 0) + 
+        COALESCE(valor_w3, 0) + 
+        COALESCE(valor_w4, 0)
+    ) AS soma_valores_previos,
+
+    -- Conta o número de semanas com dados (o divisor)
+    (
+        (CASE WHEN valor_w1 IS NOT NULL THEN 1 ELSE 0 END) + 
+        (CASE WHEN valor_w2 IS NOT NULL THEN 1 ELSE 0 END) + 
+        (CASE WHEN valor_w3 IS NOT NULL THEN 1 ELSE 0 END) + 
+        (CASE WHEN valor_w4 IS NOT NULL THEN 1 ELSE 0 END)
+    ) AS num_semanas_presentes,
+    
+    -- Calcula a Média Ajustada: Soma / Número de semanas presentes
+    SAFE_DIVIDE(
+        (COALESCE(valor_w1, 0) + COALESCE(valor_w2, 0) + COALESCE(valor_w3, 0) + COALESCE(valor_w4, 0)),
+        ((CASE WHEN valor_w1 IS NOT NULL THEN 1 ELSE 0 END) + (CASE WHEN valor_w2 IS NOT NULL THEN 1 ELSE 0 END) + (CASE WHEN valor_w3 IS NOT NULL THEN 1 ELSE 0 END) + (CASE WHEN valor_w4 IS NOT NULL THEN 1 ELSE 0 END))
+    ) AS media_ajustada_semanal,
+    
+    -- Calcula a Diferença Percentual: (Atual - Média Ajustada) / Média Ajustada * 100
+    SAFE_DIVIDE(
+        (valor_metrica - SAFE_DIVIDE((COALESCE(valor_w1, 0) + COALESCE(valor_w2, 0) + COALESCE(valor_w3, 0) + COALESCE(valor_w4, 0)), ((CASE WHEN valor_w1 IS NOT NULL THEN 1 ELSE 0 END) + (CASE WHEN valor_w2 IS NOT NULL THEN 1 ELSE 0 END) + (CASE WHEN valor_w3 IS NOT NULL THEN 1 ELSE 0 END) + (CASE WHEN valor_w4 IS NOT NULL THEN 1 ELSE 0 END)))),
+        SAFE_DIVIDE((COALESCE(valor_w1, 0) + COALESCE(valor_w2, 0) + COALESCE(valor_w3, 0) + COALESCE(valor_w4, 0)), ((CASE WHEN valor_w1 IS NOT NULL THEN 1 ELSE 0 END) + (CASE WHEN valor_w2 IS NOT NULL THEN 1 ELSE 0 END) + (CASE WHEN valor_w3 IS NOT NULL THEN 1 ELSE 0 END) + (CASE WHEN valor_w4 IS NOT NULL THEN 1 ELSE 0 END)))
+    ) * 100 AS percentual_diferenca
+    
+FROM
+    WeeklyComparison
+ORDER BY
+    data DESC, produto
