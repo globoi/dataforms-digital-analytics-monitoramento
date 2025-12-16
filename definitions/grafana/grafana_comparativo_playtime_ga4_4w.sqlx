@@ -43,27 +43,6 @@ SELECT
     produto,
     origem,
     valor_metrica, -- Valor do dia atual (Vi)
-    valor_w1,
-    valor_w2,
-    valor_w3,
-    valor_w4,
-    
-    -- Soma dos valores das semanas anteriores (NULLs são ignorados)
-    (
-        COALESCE(valor_w1, 0) + 
-        COALESCE(valor_w2, 0) + 
-        COALESCE(valor_w3, 0) + 
-        COALESCE(valor_w4, 0)
-    ) AS soma_valores_previos,
-
-    -- Conta o número de semanas com dados (o divisor)
-    (
-        (CASE WHEN valor_w1 IS NOT NULL THEN 1 ELSE 0 END) + 
-        (CASE WHEN valor_w2 IS NOT NULL THEN 1 ELSE 0 END) + 
-        (CASE WHEN valor_w3 IS NOT NULL THEN 1 ELSE 0 END) + 
-        (CASE WHEN valor_w4 IS NOT NULL THEN 1 ELSE 0 END)
-    ) AS num_semanas_presentes,
-    
     -- Calcula a Média Ajustada: Soma / Número de semanas presentes
     SAFE_DIVIDE(
         (COALESCE(valor_w1, 0) + COALESCE(valor_w2, 0) + COALESCE(valor_w3, 0) + COALESCE(valor_w4, 0)),
