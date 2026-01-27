@@ -26,13 +26,13 @@ WITH tab_player_session_info AS (
         partitionDate AS dia,
         IF(tenant = 'player', 'globoplay', tenant) AS tenant,
         playertype, 
-        sessionid AS videoSessionId,
+        videoSessionId AS videoSessionId,
         userid, 
         provider,
-        played
-      FROM ${ctx.ref("vs")} ev
+        totalPlayingTime played
+      FROM ${ctx.ref("on_demand")} ev
       WHERE partitionDate= DATE(DATE_SUB(CURRENT_DATE("America/Sao_Paulo"), INTERVAL ${day_r} DAY))  
-        AND played > 0
+        AND totalPlayingTime > 0
         AND tenant IN ('player', 'globoplay', 'g1', 'ge', 'gshow', 'receitas', 'cartola', 'home_globo', 'receitas', 'vitrine')
     ),
 
@@ -41,11 +41,11 @@ WITH tab_player_session_info AS (
         partitionDate AS dia,
         IF(tenant = 'player', 'globoplay', tenant) AS tenant,
         playertype,
-        sessionid AS videoSessionId,
-        played
-      FROM ${ctx.ref("vls")} ev
+        videoSessionId AS videoSessionId,
+        totalPlayingTime played
+      FROM ${ctx.ref("live")} ev
       WHERE partitionDate = DATE(DATE_SUB(CURRENT_DATE("America/Sao_Paulo"), INTERVAL ${day_r} DAY))  
-        AND played > 0
+        AND totalPlayingTime > 0
         AND tenant IN ('player', 'globoplay', 'g1', 'ge', 'gshow', 'receitas', 'cartola', 'home_globo', 'receitas', 'vitrine')
     ),
 
